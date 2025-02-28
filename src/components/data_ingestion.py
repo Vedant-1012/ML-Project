@@ -8,6 +8,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
+# Moved the import here to avoid circular import
+# from src.components.data_transformation import DataTransformation
+
+
 @dataclass
 class DataIngestionConfig:
     train_data_path:str = os.path.join('artifacts','train.csv')
@@ -24,38 +28,49 @@ class DataIngestionConfig:
 # and saving the data in a suitable format for the next stages of the pipeline.
 class DataIngestion:
     def __init__(self):
-        self.ingestion_config=DataIngestionConfig()
+        self.ingestion_config = DataIngestionConfig()
 
     def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion method or component")
         try:
-            df = pd.read_csv('notebook\data\stud.csv')
+            df = pd.read_csv(r'notebook\data\stud.csv')
             logging.info('Read the dataset as dataframe')
 
-            os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
+            os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok=True)
             # os.path.dirname(self.ingestion_config.train_data_path): Extracts the directory from the file path. 
             # For "artifacts/train.csv", it returns "artifacts".
             # os.makedirs(): Creates directories recursively, including any missing intermediate directories.
 
-            df.to_csv(self.ingestion_config.raw_data_path,index=False,header=True)
+            df.to_csv(self.ingestion_config.raw_data_path, index=False, header=True)
             # self.ingestion_config.raw_data_path: 
             # Specifies the file path where the CSV file will be saved (defined in your DataIngestionConfig).
             
             logging.info('Train_Test_Split initiated')
-            train_set,test_set = train_test_split(df, test_size=0.2,random_state=42)
+            train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
 
-            train_set.to_csv(self.ingestion_config.train_data_path,index=False,header=True)
-            test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True)
+            train_set.to_csv(self.ingestion_config.train_data_path, index=False, header=True)
+            test_set.to_csv(self.ingestion_config.test_data_path, index=False, header=True)
 
             logging.info('Ingestion of the data is completed')
+
+            # Moved the import inside the method to avoid circular import
+            from src.components.data_transformation import DataTransformation
+            data_transformation = DataTransformation()
+            data_transformation.initiate_data_transformation(self.ingestion_config.train_data_path, self.ingestion_config.test_data_path)
 
             return (
                 self.ingestion_config.train_data_path, 
                 self.ingestion_config.test_data_path
             )
+
         except Exception as e:
-            raise CustomException(e,sys)
+            raise CustomException(e, sys)
+
         
 if __name__ == '__main__':
     obj = DataIngestion()
-    obj.initiate_data_ingestion()
+    train_data, test_data = obj.initiate_data_ingestion()
+
+    # Initiate Data Transformation (this will now be done inside the method above)
+    # data_transformation = DataTransformation()
+    # data_transformation.initiate_data_transformation(train_data, test_data)
