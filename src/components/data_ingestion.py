@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 # Moved the import here to avoid circular import
 # from src.components.data_transformation import DataTransformation
+from src.components.model_trainer import ModelTrainerConfig
+from src.components.model_trainer import ModelTrainer
 
 
 @dataclass
@@ -56,12 +58,22 @@ class DataIngestion:
             # Moved the import inside the method to avoid circular import
             from src.components.data_transformation import DataTransformation
             data_transformation = DataTransformation()
-            data_transformation.initiate_data_transformation(self.ingestion_config.train_data_path, self.ingestion_config.test_data_path)
+            # data_transformation.initiate_data_transformation(self.ingestion_config.train_data_path, self.ingestion_config.test_data_path)
+            train_arr, test_arr, _ = data_transformation.initiate_data_transformation(
+    self.ingestion_config.train_data_path, self.ingestion_config.test_data_path
+)
 
-            return (
-                self.ingestion_config.train_data_path, 
-                self.ingestion_config.test_data_path
-            )
+
+
+            #Making changes: We need transformed data for model training
+
+
+
+            # return (
+            #     self.ingestion_config.train_data_path, 
+            #     self.ingestion_config.test_data_path
+            # )
+            return train_arr, test_arr
 
         except Exception as e:
             raise CustomException(e, sys)
@@ -69,8 +81,10 @@ class DataIngestion:
         
 if __name__ == '__main__':
     obj = DataIngestion()
-    train_data, test_data = obj.initiate_data_ingestion()
 
     # Initiate Data Transformation (this will now be done inside the method above)
     # data_transformation = DataTransformation()
     # data_transformation.initiate_data_transformation(train_data, test_data)
+    modeltrainer = ModelTrainer()
+    train_arr, test_arr= obj.initiate_data_ingestion()
+    print(modeltrainer.initiate_model_trainer(train_arr,test_arr))
