@@ -34,19 +34,49 @@ class ModelTrainer:
                 test_array[:,:-1],
                 test_array[:,-1]
             )
+            
             models = {
-                'Random Forest': RandomForestRegressor(),
-                'Decision Tree': DecisionTreeRegressor(),
-                'Linear Regression': LinearRegression(),
-                'AdaBoostRegressor': AdaBoostRegressor(),
-                'XGBoost Regressor' : XGBRegressor(),
-                'GradientBoostingRegressor' : GradientBoostingRegressor(),
-                'CatBoost Regressor' : CatBoostRegressor(verbose=False),
-                'KNeighborsRegressor' : KNeighborsRegressor()
-                
-            }
+    "Random Forest": RandomForestRegressor(),
+    "Decision Tree": DecisionTreeRegressor(),
+    "Linear Regression": LinearRegression(),
+    "AdaBoostRegressor": AdaBoostRegressor(),
+    "XGBRegressor": XGBRegressor(),
+    "GradientBoostingRegressor": GradientBoostingRegressor(),
+    "CatBoostRegressor": CatBoostRegressor()  # ✅ Correct Name
+}
 
-            model_report:dict = evaluate_model(X_train, y_train,X_test,y_test,models)
+
+            params = {
+    "Decision Tree": {
+        'criterion': ['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+    },
+    "Random Forest": {
+        'n_estimators': [8, 16, 32, 64, 128, 256]
+    },
+    "GradientBoostingRegressor": {  # ✅ Fixed key name
+        'learning_rate': [.1, .01, .05, .001],
+        'subsample': [0.6, 0.7, 0.75, 0.8, 0.85, 0.9],
+        'n_estimators': [8, 16, 32, 64, 128, 256]
+    },
+    "Linear Regression": {},
+    "XGBRegressor": {  # ✅ Fixed key name
+        'learning_rate': [.1, .01, .05, .001],
+        'n_estimators': [8, 16, 32, 64, 128, 256]
+    },
+    "CatBoostRegressor": {  # ✅ Fixed key name
+        'depth': [6, 8, 10],
+        'learning_rate': [0.01, 0.05, 0.1],
+        'iterations': [30, 50, 100]
+    },
+    "AdaBoostRegressor": {  # ✅ Fixed key name
+        'learning_rate': [.1, .01, 0.5, .001],
+        'n_estimators': [8, 16, 32, 64, 128, 256]
+    }
+}
+
+
+
+            model_report:dict = evaluate_model(X_train, y_train,X_test,y_test,models,params)
             
             # To get the best model score from dict
             best_model_score = max(sorted(model_report.values()))
